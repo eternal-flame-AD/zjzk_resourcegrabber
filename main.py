@@ -115,7 +115,7 @@ def main():
         start_download(url,size,target)
     while threading.active_count()>1:
         time.sleep(0.5)
-        print(threading.active_count())
+        print(threading.active_count()-1,' files to go...')
 try:
     main()
 finally:
