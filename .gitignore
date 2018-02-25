@@ -100,3 +100,6 @@ ENV/
 
 #config file
 config.py
+
+#downloads
+assets/
