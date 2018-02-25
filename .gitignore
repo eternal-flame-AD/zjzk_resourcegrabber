@@ -102,5 +102,5 @@ ENV/
 config.py
 
 #downloads
-assets/
+assets*/
 config.py
