@@ -1,7 +1,11 @@
-server_path="dlres.xiimoon.com"
+server_info_path="zjzksvr.xiimoon.com"
+res_server_path="dlres.xiimoon.com"
+#res_server_path="zjzkgameres-1253640862.cossh.myqcloud.com"
 platform_name="Android"
 #platform_name="IOS"
 version="1.3.0_elite"
+#version="1.1.0"
 fc_plist_path="./plist.txt"
-download_dir="./assets-ios/"
+download_dir="./assets/"
+verbose=False
 thread=20

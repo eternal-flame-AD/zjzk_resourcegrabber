@@ -4,6 +4,7 @@ import os
 import threading
 import time
 import hashlib
+import json
 new_plist=[]
 def write_new_local_plist():
     global new_plist,remote_version
@@ -44,6 +45,11 @@ def getmd5(fn):
     md5=hashlib.md5(f.read()).hexdigest()
     f.close()
     return md5
+def getjsondata(s):
+    if s['retcode']=='0':
+        return s['data']
+    else:
+        return s['retcode']+':'+s['msg']
 def get_from_plist(plist,name):
     try:
         return plist[name]
@@ -53,15 +59,16 @@ def parse_plist(local=None):
     global local_version,remote_version
     f=open(config.download_dir+'plist.txt')
     remote_version=f.readline()
-    print('remote plist version: ',remote_version)
-    print('local plist version: ',local_version)
+    print('remote plist version:\t',remote_version[:-1])
+    print('local plist version:\t',local_version[:-1])
     data=f.readlines()
     for line in data:
         info=line.split(' ')
         if len(info)==3:
             local_md5=get_from_plist(local,info[0])
             if (remote_version==local_version) and (local_md5==info[1]):
-                print('Skipped:',info[0],' Size:',int(info[2][:-1]))
+                if config.verbose:
+                    print('Skipped:',info[0],' Size:',int(info[2][:-1]))
                 local_plist_append((info[0],info[1],int(info[2][:-1])))
             else:
                 print('Download:',info[0],' Size:',int(info[2][:-1]))
@@ -90,7 +97,7 @@ def downloader(fn,size=-1,plist_info=None):
     target_fn=config.download_dir+fn
     get_ready_to_write(target_fn)
     with open(target_fn,'wb') as f:
-        conn=httpsconn.HTTPSConnection(config.server_path,port=443)
+        conn=httpsconn.HTTPSConnection(config.res_server_path,port=443)
         conn.connect()
         conn.request('GET',url)
         resp=conn.getresponse()
@@ -106,7 +113,21 @@ def start_download(fn,size,plist_info):
     worker.start()
 def geturl(dir):
     return parse_url(config.version,config.platform_name,parse_dir(dir))
-
+def get_server_info():
+    conn=httpsconn.HTTPSConnection(config.server_info_path)
+    conn.connect()
+    conn.request('GET','/resource/get?version='+config.version)
+    resource=conn.getresponse().read()
+    conn.request('GET','/notice/get?platid='+'5')
+    notice=conn.getresponse().read()
+    conn.request('GET','/server/list?platid='+'5')
+    serverlist=conn.getresponse().read()
+    resource=json.loads(resource)
+    notice=json.loads(notice)
+    serverlist=json.loads(serverlist)
+    print('resource:',getjsondata(resource))
+    print('serverlist:',getjsondata(serverlist))
+    print('notice:',getjsondata(notice))
 def main():
     local_plist=read_local_plist()
     downloader('plist.txt')
@@ -116,6 +137,8 @@ def main():
     while threading.active_count()>1:
         time.sleep(0.5)
         print(threading.active_count()-1,' files to go...')
+
+get_server_info()
 try:
     main()
 finally:
