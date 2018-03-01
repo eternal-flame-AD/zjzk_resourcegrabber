@@ -68,7 +68,7 @@ def parse_plist(local=None):
             local_md5=get_from_plist(local,info[0])
             if (remote_version==local_version) and (local_md5==info[1]):
                 if config.verbose:
-                    print('Skipped:',info[0],' Size:',int(info[2][:-1]))
+                    print('Skipped:',info[0],' Size:',int(info[2][:-1]),'local md5:',getmd5(config.download_dir+info[0]),'remote md5:',info[1])
                 local_plist_append((info[0],info[1],int(info[2][:-1])))
             else:
                 print('Download:',info[0],' Size:',int(info[2][:-1]))
